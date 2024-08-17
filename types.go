@@ -130,7 +130,7 @@ func (r *ReadRQ) UnmarshalBinary(p []byte) error {
 	mode := strings.TrimRight(plxhlder, "\x00")
 	mode = strings.ToLower(mode)
 	if mode != "octet" {
-		r = &ReadRQ{}
+		r.Filename = ""
 		return fmt.Errorf("invalid read request: %s not supported", mode)
 	} else {
 		r.Mode = mode
