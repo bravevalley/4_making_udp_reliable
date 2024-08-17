@@ -21,10 +21,10 @@ type Opcode uint16
 
 const (
 	OpRRQ  Opcode = iota + 1 // Read request Code
-	_                 // Write request not supported
-	OpData            // Data (DATA) code 
-	OpAck             // Acknowledgment (ACK) code
-	OpErr             // Error (ERROR) code
+	_                        // Write request not supported
+	OpData                   // Data (DATA) code
+	OpAck                    // Acknowledgment (ACK) code
+	OpErr                    // Error (ERROR) code
 )
 
 // TFTP Error codes
@@ -41,9 +41,6 @@ const (
 	ErrNoUser                 // 7 - No such user
 )
 
-
-
-
 // 2 bytes     string    1 byte     string   1 byte
 // ------------------------------------------------
 // | Opcode |  Filename  |   0  |    Mode    |   0  |
@@ -53,12 +50,12 @@ const (
 
 type ReadRQ struct {
 	Filename string
-	Mode string
+	Mode     string
 }
 
-// MarshalBinary writes the protocol header which contains the filename 
+// MarshalBinary writes the protocol header which contains the filename
 // and mode to a buffer. It returns a slice of bytes and a non-nil error if
-// conversion is successful 
+// conversion is successful
 func (r ReadRQ) MarshalBinary() ([]byte, error) {
 	mode := "octet"
 
@@ -67,7 +64,7 @@ func (r ReadRQ) MarshalBinary() ([]byte, error) {
 	}
 
 	buf := new(bytes.Buffer)
-	capacity := 2+len(r.Filename)+1+len(r.Mode)+1
+	capacity := 2 + len(r.Filename) + 1 + len(r.Mode) + 1
 	buf.Grow(capacity)
 
 	err := binary.Write(buf, binary.LittleEndian, OpRRQ)
@@ -83,7 +80,7 @@ func (r ReadRQ) MarshalBinary() ([]byte, error) {
 	err = buf.WriteByte(0)
 	if err != nil {
 		return nil, err
-	}	
+	}
 
 	_, err = buf.WriteString(mode)
 	if err != nil {
@@ -124,7 +121,6 @@ func (r *ReadRQ) UnmarshalBinary(p []byte) error {
 		return errors.New("invalid read request")
 	}
 
-
 	// Read mode
 	plxhlder, err = buf.ReadString(0)
 	if err != nil {
@@ -134,10 +130,11 @@ func (r *ReadRQ) UnmarshalBinary(p []byte) error {
 	mode := strings.TrimRight(plxhlder, "\x00")
 	mode = strings.ToLower(mode)
 	if mode != "octet" {
+		r = &ReadRQ{}
 		return fmt.Errorf("invalid read request: %s not supported", mode)
 	} else {
 		r.Mode = mode
 	}
 
-	return nil 
+	return nil
 }
